@@ -1,5 +1,6 @@
 import os
-import Security
+from miscellaneous import AccountManager
+import calculator
 
 logo = '''
    ______           __                   __    ____  ____  ____
@@ -18,24 +19,29 @@ main_menu = '''
                         0 - Exit
 Response: '''
 
-while True:
+while True:  # Runs the Main Menu in loop
     os.system('cls')
     print(logo)
     choice = input(main_menu)
+    print("")
 
-    os.system('cls')  # clear screen before processing user choice
+    os.system('cls')  # Clear screen before processing user choice
 
     if choice == '1':
-        Security.AccountManager().register()
+        current_user = AccountManager().register()
+        calculator.CarbonEmission(current_user).housing_emissions()
         input("Press Enter to continue...")
     elif choice == '2':
-        account_manager = Security.AccountManager()
-        account_manager.load_users()
-        account_manager.login()
+        AccountManager().load_users()
+        current_user = AccountManager().login()
+        if current_user is None:
+            input("Press Enter to continue...")
+        else:
+            calculator.CarbonEmission(current_user).housing_emissions()
+            input("Press Enter to continue...")
         input("Press Enter to continue...")
     elif choice == '0':
         break
     else:
         print("Invalid choice. Please try again.")
         input("Press Enter to continue...")
-
