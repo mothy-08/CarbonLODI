@@ -5,7 +5,8 @@ class CarbonEmission:
     def __init__(self, current_user):
         self.filename = f"user-{current_user}.txt"  # names '.txt' files for each user
 
-    def housing_emissions(self):  # Ask user for housing information
+    @staticmethod
+    def housing_emissions():  # Ask user for housing information
         house_size_sq_m = ErrorHandler.get_float("Size of your house (square meters): ")
         occupants = ErrorHandler.get_int("Number of occupants in your house: ")
         electricity_use = ErrorHandler.get_float("Electric consumption per month (kWH): ")
@@ -17,9 +18,7 @@ class CarbonEmission:
         lpg_emissions = (35 / lpg_use) * 30  # 35 CO2e = (30 per LPG cylinder) + (5 average CO2e of stove per Cylinder)
 
         # Convert to grams per day
-        house_co2e = ((electricity_emissions + lpg_emissions) / occupants / house_size_sq_ft) * 1000 / 30
-        with open(self.filename, 'a') as file:
-            file.write(f"House CO2e: {house_co2e:.2f} g/day\n")
+        return ((electricity_emissions + lpg_emissions) / occupants / house_size_sq_ft) * 1000 / 30
 
     @staticmethod
     def transportation_emissions():
@@ -38,7 +37,7 @@ class CarbonEmission:
             passengers = ErrorHandler.get_int("Number of people in the vehicle: ")
             distance = ErrorHandler.get_float("Distance of your transportation (km): ")
             fuel_efficiency = ErrorHandler.get_float("What is the fuel efficiency of the vehicle (in km/L)? ")
-            fuel_type = input("What type of fuel does the vehicle use? (1 - gasoline / 2 - diesel) ")
+            fuel_type = input("What type of fuel does the vehicle use? (1 - Gasoline / 2 - Diesel) ")
             emissions_factor = 2352.7 if fuel_type == '1' else 2639.4 if fuel_type == '2' else 0
             transportation_co2e = (emissions_factor * distance / fuel_efficiency) / passengers
         elif transportation_type == '2':
@@ -50,5 +49,33 @@ class CarbonEmission:
 
         return transportation_co2e
 
+    @staticmethod
+    def food_emissions():
+        emissions_dict = {}
+        with open("food.txt") as f:
+            for line in f:
+                food, emissions = line.strip().split(":")
+                emissions_dict[food] = float(emissions)
+        food_items = []
+        while True:
+            food_item = input("Enter a food item you ate today (or 'done' if finished): ")
+            if food_item == 'done':
+                break
+            else:
+                food_items.append(food_item)
 
-CarbonEmission.transportation_emissions()
+        food_co2e = 0
+        for food_item in food_items:
+            if food_item in emissions_dict:
+                servings = ErrorHandler.get_float(f"Your servings of {food_item} (grams) ")
+                food_co2e += (servings * emissions_dict[food_item])
+            else:
+                print(f"Sorry, we don't have emissions data for {food_item}. Skipping...")
+        return food_co2e
+
+    def calculate_all(self):
+        total_emissions = self.housing_emissions() + self.transportation_emissions() + self.food_emissions()
+        with open(self.filename, 'a') as file:
+            file.write(f"Today's Emission: {total_emissions:.2f} g/day\n")
+
+
