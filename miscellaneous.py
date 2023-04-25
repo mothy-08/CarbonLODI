@@ -16,11 +16,12 @@ class AccountManager:
         if os.path.exists("accounts.txt"):
             self.load_users()
 
-    def __encrypt_password(self, password):  # (Private) Encrypts a password using a secret key.
+    @staticmethod
+    def __encrypt_password(password):  # (Private) Encrypts a password using a secret key.
 
         __secret_key = "MathintheModernWorld"
         encrypted_password = ""
-        for i, char in enumerate(password):  # Shifts each characters by certain amount depending on the '__secret_key'
+        for i, char in enumerate(password):  # Shifts each character by certain amount depending on the '__secret_key'
             shift = ord(__secret_key[i % len(__secret_key)]) - ord('a')
             shifted_char = chr((ord(char) - ord('a') + shift) % 26 + ord('a'))
             encrypted_password += shifted_char
@@ -54,9 +55,10 @@ class AccountManager:
         encrypted_password = self.__encrypt_password(password)
         if username in self.users and self.users[username]['password'] == encrypted_password:
             print(f"Welcome, {username}!")
+            return username
         else:
             print("Invalid username or password.")
-        return username
+
 
 
 class ErrorHandler:
@@ -84,6 +86,3 @@ class ErrorHandler:
                 return int(input(prompt))
             except ValueError:
                 print("Invalid input. Please enter a valid integer value.")
-
-
-
